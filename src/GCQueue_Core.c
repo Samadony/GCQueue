@@ -106,7 +106,7 @@ PUBLIC GCQ_Status_t GCQueue_Enqueue(GCQ_t* const self, const uint8_t* const u8pt
 			if( QUEUE_ENABLE_OVR_WRT ||(GCQ_FULL != GCQueue_IsFull(self)) )
 			{
 				self->data_buffer_ptr[self->write_idx] = *u8ptr_data_enqueued;
-				self->write_idx = ((self->write_idx + 1) % QUEUE_BUFFER_SIZE);
+				self->write_idx = ((self->write_idx + 1U) % QUEUE_BUFFER_SIZE);
 				gcq_status = GCQ_OK;
 			}
 			else //Queue is Full
@@ -132,7 +132,23 @@ PUBLIC GCQ_Status_t GCQueue_Dequeue(GCQ_t* const self, uint8_t* const u8ptr_data
 
 	if((NULL != self) && (NULL != self->data_buffer_ptr))
 	{
-
+		if(NULL != u8ptr_data_dequeued)
+		{
+			if( GCQ_EMPTY != GCQueue_IsEmpty(self))
+			{
+				*u8ptr_data_dequeued = self->data_buffer_ptr[self->read_idx];
+				self->read_idx = ((self->read_idx + 1U) % QUEUE_BUFFER_SIZE);
+				gcq_status = GCQ_OK;
+			}
+			else //Queue is Empty
+			{
+				gcq_status = GCQ_EMPTY;
+			}
+		}
+		else
+		{
+			gcq_status = GCQ_ENQUEUE_DATA_NULL;
+		}
 	}
 	else
 	{

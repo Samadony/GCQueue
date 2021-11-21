@@ -288,14 +288,17 @@ void test_GCQueue_IsEmpty_induced_testing(void)
  *
  * Scenario_0.0, fill the buffer till full
  * Arrange: Har
- * Act: Call GCQueue_Enqueue() in loop equal to the array size
+ * Act: Call GCQueue_Enqueue() in loop equal to the array`s (size -1)
  * Assert: the outcome shall be always gcq_status = GCQ_OK
+ *
+ * Assert: check if it full
+ * Assert: all data of the buffer shall be enqueued_data = 1377
  */
 void test_GCQueue_Enqueue(void)
 {
 	GCQ_Status_t gcq_status;
 	uint16_t iterator = 0;
-	uint8_t enqueued_data = 137;
+	uint8_t enqueued_data = 137;//random u8 number
 	//Scenario_0.0
 	gcq_status = GCQueue_EraseHard(&gcq_header_utest);
 	TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
@@ -318,7 +321,71 @@ void test_GCQueue_Enqueue(void)
 	}
 }
 
+/*
+ *Goal, Dequeue untill the buffer is empty with known pattern
+ *
+ * Scenario_0.0, dequeue untill empty
+ * Arrange: Enqueue till Full
+ * Act: Call GCQueue_Dequeue() in loop equal to the array size -1
+ * Assert: the outcome shall be always gcq_status = GCQ_OK
+ *
+ * Scenario_1.0, Arrange a mixed enqueue, dequeue request
+ *
+ *
+ */
+void test_GCQueue_Dequeue(void)
+{
+	GCQ_Status_t gcq_status;
+	uint8_t enqueued_data = 137;//random u8 number
+	uint8_t dequeued_data = 0;//random u8 number
+	uint16_t iterator = 0;
 
+	//Scenario_0.0
+	for(iterator = 0 ; iterator < (QUEUE_BUFFER_SIZE-1) ; iterator++)
+	{
+		gcq_status = GCQueue_Enqueue(&gcq_header_utest, &enqueued_data);
+		TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
+	}
+	for(iterator = 0 ; iterator < (QUEUE_BUFFER_SIZE-1) ; iterator++)
+	{
+		gcq_status = GCQueue_Dequeue(&gcq_header_utest, &dequeued_data);
+		TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
+		TEST_ASSERT_EQUAL(enqueued_data, dequeued_data);
+	}
+	/*
+	 * One more dequeue, the status shall be Empty
+	 */
+	gcq_status = GCQueue_Dequeue(&gcq_header_utest, &dequeued_data);
+	TEST_ASSERT_EQUAL(GCQ_EMPTY, gcq_status);
+	TEST_ASSERT_EQUAL(enqueued_data, dequeued_data);
+
+	//Scenario_1.0
+	for(iterator = 0 ; iterator < ((QUEUE_BUFFER_SIZE-1)/2) ; iterator++)
+	{
+		gcq_status = GCQueue_Enqueue(&gcq_header_utest, &enqueued_data);
+		TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
+	}
+	for(iterator = 0 ; iterator < ((QUEUE_BUFFER_SIZE-1)/4) ; iterator++)
+	{
+		gcq_status = GCQueue_Dequeue(&gcq_header_utest, &dequeued_data);
+		TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
+		TEST_ASSERT_EQUAL(enqueued_data, dequeued_data);
+	}
+	for(iterator = 0 ; iterator < ((QUEUE_BUFFER_SIZE-1)/2) ; iterator++)
+	{
+		gcq_status = GCQueue_Enqueue(&gcq_header_utest, &enqueued_data);
+		TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
+	}
+	for(iterator = 0 ; iterator < ((QUEUE_BUFFER_SIZE-1)/4) ; iterator++)
+	{
+		gcq_status = GCQueue_Enqueue(&gcq_header_utest, &enqueued_data);
+		TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
+	}
+	gcq_status = GCQueue_Enqueue(&gcq_header_utest, &enqueued_data);
+	TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
+	gcq_status = GCQueue_Enqueue(&gcq_header_utest, &enqueued_data);
+	TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
+}
 int main(void) {
     UNITY_BEGIN();
     RUN_TEST(test_HardErase_of_the_GCQueue);
@@ -326,5 +393,6 @@ int main(void) {
     RUN_TEST(test_GCQueue_IsFull_induced_testing);
     RUN_TEST(test_GCQueue_IsEmpty_induced_testing);
     RUN_TEST(test_GCQueue_Enqueue);
+    RUN_TEST(test_GCQueue_Dequeue);
     return UNITY_END();
 }

@@ -16,6 +16,11 @@
  */
 #define QUEUE_ENABLE_OVR_WRT			false
 #define QUEUE_ERASE_VALUE				0x00U
+/*
+ * There will be always one extra place need to be used, best that the user
+ * adapt the numbe to be divisible by MEMORY_WORD knowing that there will be
+ * always size - 1 used to check the memory status (full not full)
+ */
 #define QUEUE_BUFFER_SIZE				512U
 
 
