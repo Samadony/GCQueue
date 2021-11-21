@@ -1,0 +1,330 @@
+
+#include <GCQueue_Core.h>
+#include <GCQueue_Interface.h>
+#include <utils/defines.h>
+#include <unity.h>
+#include <stddef.h>
+#include <string.h>
+#include <stdint.h>
+
+
+#define UTEST_GCQ_HARD_ERASE_VALUE			0xAAU
+
+
+PRIVATE uint8_t cq_buffer_utest[QUEUE_BUFFER_SIZE];
+PRIVATE GCQ_t gcq_header_utest = {
+		.write_idx = 0,
+		.read_idx = 0,
+		.data_buffer_ptr = cq_buffer_utest,
+};
+
+void setUp(void)
+{
+	gcq_header_utest.write_idx = -1;
+	gcq_header_utest.read_idx = -1;
+	gcq_header_utest.data_buffer_ptr = cq_buffer_utest;
+	memset(gcq_header_utest.data_buffer_ptr, UTEST_GCQ_HARD_ERASE_VALUE,
+			QUEUE_BUFFER_SIZE* sizeof(gcq_header_utest.data_buffer_ptr[0]));
+}
+
+void tearDown(void)
+{
+	//Do Nothing
+}
+
+/*
+ * Goal: 1- check whether the Hard erase is done in a proper way
+ *
+ * //Scenario_0
+ * Arrange:
+ * Act: call EraseHard_GCQueue(&cq_buffer_utest)
+ * Assert:
+ * - gcq_status = Q_OK
+ * - write_idx = 0
+ * - read_idx  = 0
+ * - data_buffer_ptr[0 -> QUEUE_BUFFER_SIZE -1 ] = QUEUE_ERASE_VALUE
+ *
+ * //Scenario_1
+ * Arrange:
+ * Act: EraseHard_GCQueue(NULL)
+ * Assert:
+ * - gcq_status = GCQ_NULL_BUFFER
+ *
+ * //Scenario_2
+ * Arrange: gcq_header_utest.data_buffer_ptr = NULL
+ * Act:
+ * Assert:
+ * - TEST_ASSERT_NULL(gcq_header_utest.data_buffer_ptr)
+ * - gcq_status = GCQ_NULL_BUFFER
+ *
+ */
+void test_HardErase_of_the_GCQueue(void)
+{
+	uint16_t iterator;
+	GCQ_Status_t gcq_status;
+/*
+ * Test happy scenario
+ */
+	//Secenrio_0
+	gcq_status = GCQueue_EraseHard(&gcq_header_utest);
+	TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
+	TEST_ASSERT_EQUAL(gcq_header_utest.write_idx, 0);
+	TEST_ASSERT_EQUAL(gcq_header_utest.read_idx, 0);
+	for(iterator = 0; iterator < QUEUE_BUFFER_SIZE; iterator++)
+	{
+    	TEST_ASSERT_EQUAL(QUEUE_ERASE_VALUE, gcq_header_utest.data_buffer_ptr[iterator]);
+	}
+/*
+ * Test sad scenario
+ */
+	//Scenario_1
+	gcq_status = GCQueue_EraseHard(NULL);
+	TEST_ASSERT_EQUAL(GCQ_DATA_BUFFER_NULL, gcq_status);
+
+	//Scenario_2
+	gcq_header_utest.data_buffer_ptr = NULL;
+	gcq_status = GCQueue_EraseHard(NULL);
+	TEST_ASSERT_EQUAL(GCQ_DATA_BUFFER_NULL, gcq_status);
+
+}
+/*
+ * Goal: check whether the Soft erase is done in a proper way (only buffer indices are reset to 0)
+ *
+  * //Scenario_0
+ * Arrange:
+ * Act: call EraseSoft_GCQueue(&cq_buffer_utest)
+ * Assert:
+ * - gcq_status = Q_OK
+ * - write_idx = 0
+ * - read_idx  = 0
+ * - data_buffer_ptr[0 -> QUEUE_BUFFER_SIZE -1 ] = UTEST_GCQ_HARD_ERASE_VALUE
+ *
+ * //Scenario_1
+ * Arrange:
+ * Act: EraseSoft_GCQueue(NULL)
+ * Assert:
+ * - gcq_status = GCQ_NULL_BUFFER
+ *
+ * //Scenario_2
+ * Arrange: gcq_header_utest.data_buffer_ptr = NULL
+ * Act:
+ * Assert:
+ * - TEST_ASSERT_NULL(gcq_header_utest.data_buffer_ptr)
+ * - gcq_status = GCQ_NULL_BUFFER
+ *
+ */
+void test_SoftErase_of_the_GCQueue(void)
+{
+	uint16_t iterator;
+	GCQ_Status_t gcq_status;
+/*
+ * Test happy scenario
+ */
+	//Secenrio_0
+	gcq_status = GCQueue_EraseSoft(&gcq_header_utest);
+	TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
+	TEST_ASSERT_EQUAL(gcq_header_utest.write_idx, 0);
+	TEST_ASSERT_EQUAL(gcq_header_utest.read_idx, 0);
+
+	for(iterator = 0; iterator < QUEUE_BUFFER_SIZE; iterator++)
+	{
+    	TEST_ASSERT_EQUAL(UTEST_GCQ_HARD_ERASE_VALUE, gcq_header_utest.data_buffer_ptr[iterator]);
+	}
+/*
+ * Test sad scenario
+ */
+	//Scenario_1
+	gcq_status = GCQueue_EraseSoft(NULL);
+	TEST_ASSERT_EQUAL(GCQ_DATA_BUFFER_NULL, gcq_status);
+
+	//Scenario_2
+	gcq_header_utest.data_buffer_ptr = NULL;
+	gcq_status = GCQueue_EraseSoft(NULL);
+	TEST_ASSERT_EQUAL(GCQ_DATA_BUFFER_NULL, gcq_status);
+
+}
+/*
+ * Goal, test GCQueue_IsFull
+ *
+ * Scenario_0.0: the buffer is Full
+ * Arrange: set read_idx =  0  write_idx = QUEUE_BUFFER_SIZE -1
+ * Act: call GCQueue_IsFull
+ * Assert: 	GCQ_Status_t gcq_status = GCQ_FULL
+ *
+ * Scenario_0.1: the buffer is Full
+ * Arrange: set read_idx = x and write_idx = (x - 1) (0 =< x =< QUEUE_BUFFER_SIZE -1)
+ * Act: call GCQueue_IsFull()
+ * Assert: 	GCQ_Status_t gcq_status = GCQ_FULL
+ *
+ * Scenario_1: the buffer is not Full
+ * Arrange: set read_idx = write_idx = x  ( x == 5)
+ * Act: GCQueue_IsFull()
+ * Assert: GCQ_Status_t gcq_status = GCQ_OK
+ *
+ * Scenario_2: the buffer is Empty
+ * Arrange: set read_idx = write_idx = x  ( x == 0)
+ * Act: GCQueue_IsFull()
+ * Assert: GCQ_Status_t gcq_status = GCQ_OK
+ *
+ */
+void test_GCQueue_IsFull_induced_testing(void)
+{
+	GCQ_Status_t gcq_status;
+	uint16_t random_index_within_range = 200;
+	uint16_t first_index_in_buffer = 0;
+	uint16_t last_index_in_buffer = QUEUE_BUFFER_SIZE -1;
+
+	//Scenario_0.0
+	gcq_header_utest.read_idx = first_index_in_buffer;
+	gcq_header_utest.write_idx = last_index_in_buffer;
+	gcq_status = GCQueue_IsFull(&gcq_header_utest);
+	TEST_ASSERT_EQUAL(GCQ_FULL, gcq_status);
+
+	//Scenario_0.1
+	gcq_header_utest.read_idx = random_index_within_range;
+	gcq_header_utest.write_idx = gcq_header_utest.read_idx - 1;
+	gcq_status = GCQueue_IsFull(&gcq_header_utest);
+	TEST_ASSERT_EQUAL(GCQ_FULL, gcq_status);
+
+	//Scenario_1.0
+	gcq_header_utest.write_idx = random_index_within_range;
+	gcq_header_utest.read_idx = random_index_within_range + 2; // just make the difference between the 2 indices more than 1
+	gcq_status = GCQueue_IsFull(&gcq_header_utest);
+	TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
+
+	//Scenario_2.0
+	/*
+	 * Note: I deliberately assigned write_idx first then read_idx, since read
+	 * should catch up with the write_idx but the write_idx should never catch up
+	 * with the read_idx UNLESS over writing is enabled.
+	 * TODO: Disable this test when over writing is enabled and enable it when
+	 * overwritng is disabled
+	 */
+	gcq_header_utest.write_idx = random_index_within_range;
+	gcq_header_utest.read_idx = gcq_header_utest.write_idx ;
+	gcq_status = GCQueue_IsFull(&gcq_header_utest);
+	TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
+
+	//Scenario_2.1
+	/*
+	 * Empty case, both idxs = 0
+	 */
+	gcq_header_utest.write_idx = first_index_in_buffer;
+	gcq_header_utest.read_idx = first_index_in_buffer;
+	gcq_status = GCQueue_IsFull(&gcq_header_utest);
+	TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
+}
+
+/*
+ * Goal, test GCQueue_IsEmpty()
+ *
+ * Scenario_0: the buffer is Empty
+ * Arrange: set read_idx = write_idx = 0
+ * Act: call GCQueue_IsEmpty()
+ * Assert: 	GCQ_Status_t gcq_status = GCQ_Empty
+ *
+ * Scenario_1: the buffer is not empty
+ * Arrange: set read_idx = random_number_within_size and write_idx = read_idx + 2,
+ * just both number shall be with difference more than 1
+ * Act: call GCQueue_IsEmpty()
+ * Assert: 	GCQ_Status_t gcq_status = GCQ_FULL
+ *
+ * Scenario_2: the buffer is Full
+ * Arrange: set read_idx = 0 and write_idx = size - 1
+ * Act: call GCQueue_IsEmpty()
+ * Assert: 	GCQ_Status_t gcq_status = GCQ_FULL
+ *
+ *
+ *
+ */
+void test_GCQueue_IsEmpty_induced_testing(void)
+{
+	GCQ_Status_t gcq_status;
+	uint16_t random_index_within_range = 200;
+	uint16_t first_index_in_buffer = 0;
+	uint16_t last_index_in_buffer = QUEUE_BUFFER_SIZE -1;
+	uint8_t idx_diff = 2;
+
+	//Scenario_0.0
+	gcq_header_utest.read_idx = first_index_in_buffer;
+	gcq_header_utest.write_idx = first_index_in_buffer;
+	gcq_status = GCQueue_IsEmpty(&gcq_header_utest);
+	TEST_ASSERT_EQUAL(GCQ_EMPTY, gcq_status);
+
+	//Scenario_0.1
+	gcq_header_utest.read_idx = random_index_within_range;
+	gcq_header_utest.write_idx = random_index_within_range;
+	gcq_status = GCQueue_IsEmpty(&gcq_header_utest);
+	TEST_ASSERT_EQUAL(GCQ_EMPTY, gcq_status);
+
+	//Scenario_0.2
+	gcq_header_utest.write_idx = last_index_in_buffer;
+	gcq_header_utest.read_idx = last_index_in_buffer;
+	gcq_status = GCQueue_IsEmpty(&gcq_header_utest);
+	TEST_ASSERT_EQUAL(GCQ_EMPTY, gcq_status);
+
+	//Scenario_1.0
+	/*
+	 * Note: I deliberately assigned write_idx first then read_idx, since read
+	 * should catch up with the write_idx but the write_idx should never catch up
+	 * with the read_idx UNLESS over writing is enabled.
+	 * TODO: Disable this test when over writing is enabled and enable it when
+	 * overwritng is disabled
+	 */
+	gcq_header_utest.write_idx = random_index_within_range; //random < size -2 (at least)
+	gcq_header_utest.read_idx = random_index_within_range - idx_diff ; // diff more than 1
+	gcq_status = GCQueue_IsEmpty(&gcq_header_utest);
+	TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
+
+	//Scenario 1.1
+	gcq_header_utest.write_idx = first_index_in_buffer; //random < size -2 (at least)
+	gcq_header_utest.read_idx = last_index_in_buffer ; // diff more than 1
+	gcq_status = GCQueue_IsEmpty(&gcq_header_utest);
+	TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
+}
+
+/*
+ *Goal, Enqueue untill the buffer is full with known pattern
+ *
+ * Scenario_0.0, fill the buffer till full
+ * Arrange: Har
+ * Act: Call GCQueue_Enqueue() in loop equal to the array size
+ * Assert: the outcome shall be always gcq_status = GCQ_OK
+ */
+void test_GCQueue_Enqueue(void)
+{
+	GCQ_Status_t gcq_status;
+	uint16_t iterator = 0;
+	uint8_t enqueued_data = 137;
+	//Scenario_0.0
+	gcq_status = GCQueue_EraseHard(&gcq_header_utest);
+	TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
+	for(iterator = 0 ; iterator < (QUEUE_BUFFER_SIZE-1) ; iterator++)
+	{
+		gcq_status = GCQueue_Enqueue(&gcq_header_utest, &enqueued_data);
+		TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
+	}
+	for(iterator = 0 ; iterator < (QUEUE_BUFFER_SIZE-1) ; iterator++)
+	{
+		TEST_ASSERT_EQUAL(enqueued_data, gcq_header_utest.data_buffer_ptr[iterator]);
+	}
+	//Its now Full queue, Enqueue One more time expecting a full status
+	gcq_status = GCQueue_Enqueue(&gcq_header_utest, &enqueued_data);
+	TEST_ASSERT_EQUAL(GCQ_FULL, gcq_status);
+	//Make sure our buffer isnt touched (test data integrity) after a full status
+	for(iterator = 0 ; iterator < (QUEUE_BUFFER_SIZE-1) ; iterator++)
+	{
+		TEST_ASSERT_EQUAL(enqueued_data, gcq_header_utest.data_buffer_ptr[iterator]);
+	}
+}
+
+
+int main(void) {
+    UNITY_BEGIN();
+    RUN_TEST(test_HardErase_of_the_GCQueue);
+    RUN_TEST(test_SoftErase_of_the_GCQueue);
+    RUN_TEST(test_GCQueue_IsFull_induced_testing);
+    RUN_TEST(test_GCQueue_IsEmpty_induced_testing);
+    RUN_TEST(test_GCQueue_Enqueue);
+    return UNITY_END();
+}
