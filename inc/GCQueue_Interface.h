@@ -46,8 +46,18 @@ typedef enum{
  * signed/unsigned 8, 16, 32 and 64 bits variables
  */
 #define DEFINE_GCQUEUE(TYPE)					DEFINE_GCQUEUE_ABSTRACTOR(TYPE)
+
+/* Pre -requisite: calling DEFINE_GCQUEUE() with the same type used for object creation
+ * Template to instantiate queue_header + queue buffer with types varies between
+ * signed/unsigned 8, 16, 32 and 64 bits variables
+ */
 #define CREATE_GCQUEUE(TYPE, NAME, BUFFER_SIZE_IN_TYPE_SIZE)\
 				CREATE_GCQUEUE_ABSTRACTOR(TYPE, NAME, BUFFER_SIZE_IN_TYPE_SIZE)
 
+/*
+ * APIs
+ */
+#define GCQ_HARD_ERASE_API(TYPE, OBJECT) 			GCQ_HARD_ERASE_ABSTRACTOR(TYPE, OBJECT)
+#define GCQ_SOFT_ERASE_API(TYPE, OBJECT) 			GCQ_SOFT_ERASE_ABSTRACTOR(TYPE, OBJECT)
 
 #endif /* INC_GCQUEUE_INTERFACE_H_ */

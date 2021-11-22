@@ -68,7 +68,7 @@ void test_HardErase_of_the_GCQueue(void)
  * Test happy scenario
  */
 	//Secenrio_0
-	gcq_status = GCQueue_EraseHard(&gcqueue_utest);
+	gcq_status = GCQ_HARD_ERASE_API(UTEST_TYPE_BEING_TESTED, &gcqueue_utest);
 	TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
 	TEST_ASSERT_EQUAL(gcqueue_utest.write_idx, 0);
 	TEST_ASSERT_EQUAL(gcqueue_utest.read_idx, 0);
@@ -80,12 +80,12 @@ void test_HardErase_of_the_GCQueue(void)
  * Test sad scenario
  */
 	//Scenario_1
-	gcq_status = GCQueue_EraseHard(NULL);
+	gcq_status = GCQ_HARD_ERASE_API(UTEST_TYPE_BEING_TESTED, NULL);
 	TEST_ASSERT_EQUAL(GCQ_DATA_BUFFER_NULL, gcq_status);
 
 	//Scenario_2
 	gcqueue_utest.data_buffer_ptr = NULL;
-	gcq_status = GCQueue_EraseHard(NULL);
+	gcq_status = GCQ_HARD_ERASE_API(UTEST_TYPE_BEING_TESTED,NULL);
 	TEST_ASSERT_EQUAL(GCQ_DATA_BUFFER_NULL, gcq_status);
 
 }
@@ -123,7 +123,7 @@ void test_SoftErase_of_the_GCQueue(void)
  * Test happy scenario
  */
 	//Secenrio_0
-	gcq_status = GCQueue_EraseSoft(&gcqueue_utest);
+	gcq_status = GCQ_HARD_ERASE_API(UTEST_TYPE_BEING_TESTED, &gcqueue_utest);
 	TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
 	TEST_ASSERT_EQUAL(gcqueue_utest.write_idx, 0);
 	TEST_ASSERT_EQUAL(gcqueue_utest.read_idx, 0);
@@ -136,12 +136,12 @@ void test_SoftErase_of_the_GCQueue(void)
  * Test sad scenario
  */
 	//Scenario_1
-	gcq_status = GCQueue_EraseSoft(NULL);
+	gcq_status = GCQ_HARD_ERASE_API(UTEST_TYPE_BEING_TESTED, NULL);
 	TEST_ASSERT_EQUAL(GCQ_DATA_BUFFER_NULL, gcq_status);
 
 	//Scenario_2
 	gcqueue_utest.data_buffer_ptr = NULL;
-	gcq_status = GCQueue_EraseSoft(NULL);
+	gcq_status = GCQ_SOFT_ERASE_API(UTEST_TYPE_BEING_TESTED, NULL);
 	TEST_ASSERT_EQUAL(GCQ_DATA_BUFFER_NULL, gcq_status);
 
 }
