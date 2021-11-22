@@ -14,11 +14,40 @@
 DEFINE_GCQUEUE(UTEST_TYPE_BEING_TESTED);
 CREATE_GCQUEUE(UTEST_TYPE_BEING_TESTED, gcqueue_utest, QUEUE_BUFFER_SIZE);
 
+
 /*
  * Goal, test the template against mulitple definitins and instantiations
  */
-DEFINE_GCQUEUE(uint32_t);
-CREATE_GCQUEUE(uint32_t, gcqueue_utest_2, QUEUE_BUFFER_SIZE);
+//DEFINE_GCQUEUE(uint16_t);
+//DEFINE_GCQUEUE(uint32_t);
+//DEFINE_GCQUEUE(uint64_t);
+//DEFINE_GCQUEUE(int8_t);
+//DEFINE_GCQUEUE(int16_t);
+//DEFINE_GCQUEUE(int32_t);
+//DEFINE_GCQUEUE(int64_t);
+//
+//void test_template_implementation(void)
+//{
+//	CREATE_GCQUEUE(uint8_t, gcqueue_utest_0, QUEUE_BUFFER_SIZE);
+//	CREATE_GCQUEUE(uint16_t, gcqueue_utest_1, QUEUE_BUFFER_SIZE);
+//	CREATE_GCQUEUE(uint32_t, gcqueue_utest_2, QUEUE_BUFFER_SIZE);
+//	CREATE_GCQUEUE(uint64_t, gcqueue_utest_3, QUEUE_BUFFER_SIZE);
+//
+//	CREATE_GCQUEUE(int8_t, gcqueue_utest_4, QUEUE_BUFFER_SIZE);
+//	CREATE_GCQUEUE(int16_t, gcqueue_utest_5, QUEUE_BUFFER_SIZE);
+//	CREATE_GCQUEUE(int32_t, gcqueue_utest_6, QUEUE_BUFFER_SIZE);
+//	CREATE_GCQUEUE(int64_t, gcqueue_utest_7, QUEUE_BUFFER_SIZE);
+//
+//	GCQ_HARD_ERASE_ABSTRACTOR(uint8_t, gcqueue_utest_0);
+//	GCQ_SOFT_ERASE_ABSTRACTOR(TYPE, OBJECT_ADD)
+//	GCQ_IS_FULL_ABSTRACTOR(TYPE, OBJECT_ADD)
+//	GCQ_IS_EMPTY_ABSTRACTOR(TYPE, OBJECT_ADD)
+//	GCQ_ENQUEUE_ABSTRACTOR(TYPE, OBJECT_ADD, DATA_ADD)
+//	GCQ_DEQUEUE_ABSTRACTOR(TYPE, OBJECT_ADD, DATA_ADD)
+//	GCQ_PEEK_ABSTRACTOR(TYPE, OBJECT_ADD, DATA_ADD)
+//}
+
+
 
 void setUp(void)
 {
@@ -123,7 +152,7 @@ void test_SoftErase_of_the_GCQueue(void)
  * Test happy scenario
  */
 	//Secenrio_0
-	gcq_status = GCQ_HARD_ERASE_API(UTEST_TYPE_BEING_TESTED, &gcqueue_utest);
+	gcq_status = GCQ_SOFT_ERASE_API(UTEST_TYPE_BEING_TESTED, &gcqueue_utest);
 	TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
 	TEST_ASSERT_EQUAL(gcqueue_utest.write_idx, 0);
 	TEST_ASSERT_EQUAL(gcqueue_utest.read_idx, 0);
@@ -155,17 +184,17 @@ void test_SoftErase_of_the_GCQueue(void)
  *
  * Scenario_0.1: the buffer is Full
  * Arrange: set read_idx = x and write_idx = (x - 1) (0 =< x =< QUEUE_BUFFER_SIZE -1)
- * Act: call GCQueue_IsFull()
+ * Act: call GCQ_IS_FULL_API(UTEST_TYPE_BEING_TESTED, )
  * Assert: 	GCQ_Status_t gcq_status = GCQ_FULL
  *
  * Scenario_1: the buffer is not Full
  * Arrange: set read_idx = write_idx = x  ( x == 5)
- * Act: GCQueue_IsFull()
+ * Act: GCQ_IS_FULL_API(UTEST_TYPE_BEING_TESTED, )
  * Assert: GCQ_Status_t gcq_status = GCQ_OK
  *
  * Scenario_2: the buffer is Empty
  * Arrange: set read_idx = write_idx = x  ( x == 0)
- * Act: GCQueue_IsFull()
+ * Act: GCQ_IS_FULL_API(UTEST_TYPE_BEING_TESTED, )
  * Assert: GCQ_Status_t gcq_status = GCQ_OK
  *
  */
@@ -179,19 +208,19 @@ void test_GCQueue_IsFull_induced_testing(void)
 	//Scenario_0.0
 	gcqueue_utest.read_idx = first_index_in_buffer;
 	gcqueue_utest.write_idx = last_index_in_buffer;
-	gcq_status = GCQueue_IsFull(&gcqueue_utest);
+	gcq_status = GCQ_IS_FULL_API(UTEST_TYPE_BEING_TESTED, &gcqueue_utest);
 	TEST_ASSERT_EQUAL(GCQ_FULL, gcq_status);
 
 	//Scenario_0.1
 	gcqueue_utest.read_idx = random_index_within_range;
 	gcqueue_utest.write_idx = gcqueue_utest.read_idx - 1;
-	gcq_status = GCQueue_IsFull(&gcqueue_utest);
+	gcq_status = GCQ_IS_FULL_API(UTEST_TYPE_BEING_TESTED, &gcqueue_utest);
 	TEST_ASSERT_EQUAL(GCQ_FULL, gcq_status);
 
 	//Scenario_1.0
 	gcqueue_utest.write_idx = random_index_within_range;
 	gcqueue_utest.read_idx = random_index_within_range + 2; // just make the difference between the 2 indices more than 1
-	gcq_status = GCQueue_IsFull(&gcqueue_utest);
+	gcq_status = GCQ_IS_FULL_API(UTEST_TYPE_BEING_TESTED, &gcqueue_utest);
 	TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
 
 	//Scenario_2.0
@@ -204,7 +233,7 @@ void test_GCQueue_IsFull_induced_testing(void)
 	 */
 	gcqueue_utest.write_idx = random_index_within_range;
 	gcqueue_utest.read_idx = gcqueue_utest.write_idx ;
-	gcq_status = GCQueue_IsFull(&gcqueue_utest);
+	gcq_status = GCQ_IS_FULL_API(UTEST_TYPE_BEING_TESTED, &gcqueue_utest);
 	TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
 
 	//Scenario_2.1
@@ -213,27 +242,27 @@ void test_GCQueue_IsFull_induced_testing(void)
 	 */
 	gcqueue_utest.write_idx = first_index_in_buffer;
 	gcqueue_utest.read_idx = first_index_in_buffer;
-	gcq_status = GCQueue_IsFull(&gcqueue_utest);
+	gcq_status = GCQ_IS_FULL_API(UTEST_TYPE_BEING_TESTED, &gcqueue_utest);
 	TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
 }
 
 /*
- * Goal, test GCQueue_IsEmpty()
+ * Goal, test GCQ_IS_EMPTY_API(UTEST_TYPE_BEING_TESTED, )
  *
  * Scenario_0: the buffer is Empty
  * Arrange: set read_idx = write_idx = 0
- * Act: call GCQueue_IsEmpty()
+ * Act: call GCQ_IS_EMPTY_API(UTEST_TYPE_BEING_TESTED, )
  * Assert: 	GCQ_Status_t gcq_status = GCQ_Empty
  *
  * Scenario_1: the buffer is not empty
  * Arrange: set read_idx = random_number_within_size and write_idx = read_idx + 2,
  * just both number shall be with difference more than 1
- * Act: call GCQueue_IsEmpty()
+ * Act: call GCQ_IS_EMPTY_API(UTEST_TYPE_BEING_TESTED, )
  * Assert: 	GCQ_Status_t gcq_status = GCQ_FULL
  *
  * Scenario_2: the buffer is Full
  * Arrange: set read_idx = 0 and write_idx = size - 1
- * Act: call GCQueue_IsEmpty()
+ * Act: call GCQ_IS_EMPTY_API(UTEST_TYPE_BEING_TESTED, )
  * Assert: 	GCQ_Status_t gcq_status = GCQ_FULL
  *
  *
@@ -250,19 +279,19 @@ void test_GCQueue_IsEmpty_induced_testing(void)
 	//Scenario_0.0
 	gcqueue_utest.read_idx = first_index_in_buffer;
 	gcqueue_utest.write_idx = first_index_in_buffer;
-	gcq_status = GCQueue_IsEmpty(&gcqueue_utest);
+	gcq_status = GCQ_IS_EMPTY_API(UTEST_TYPE_BEING_TESTED, &gcqueue_utest);
 	TEST_ASSERT_EQUAL(GCQ_EMPTY, gcq_status);
 
 	//Scenario_0.1
 	gcqueue_utest.read_idx = random_index_within_range;
 	gcqueue_utest.write_idx = random_index_within_range;
-	gcq_status = GCQueue_IsEmpty(&gcqueue_utest);
+	gcq_status = GCQ_IS_EMPTY_API(UTEST_TYPE_BEING_TESTED, &gcqueue_utest);
 	TEST_ASSERT_EQUAL(GCQ_EMPTY, gcq_status);
 
 	//Scenario_0.2
 	gcqueue_utest.write_idx = last_index_in_buffer;
 	gcqueue_utest.read_idx = last_index_in_buffer;
-	gcq_status = GCQueue_IsEmpty(&gcqueue_utest);
+	gcq_status = GCQ_IS_EMPTY_API(UTEST_TYPE_BEING_TESTED, &gcqueue_utest);
 	TEST_ASSERT_EQUAL(GCQ_EMPTY, gcq_status);
 
 	//Scenario_1.0
@@ -275,13 +304,13 @@ void test_GCQueue_IsEmpty_induced_testing(void)
 	 */
 	gcqueue_utest.write_idx = random_index_within_range; //random < size -2 (at least)
 	gcqueue_utest.read_idx = random_index_within_range - idx_diff ; // diff more than 1
-	gcq_status = GCQueue_IsEmpty(&gcqueue_utest);
+	gcq_status = GCQ_IS_EMPTY_API(UTEST_TYPE_BEING_TESTED, &gcqueue_utest);
 	TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
 
 	//Scenario 1.1
 	gcqueue_utest.write_idx = first_index_in_buffer; //random < size -2 (at least)
 	gcqueue_utest.read_idx = last_index_in_buffer ; // diff more than 1
-	gcq_status = GCQueue_IsEmpty(&gcqueue_utest);
+	gcq_status = GCQ_IS_EMPTY_API(UTEST_TYPE_BEING_TESTED, &gcqueue_utest);
 	TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
 }
 
@@ -290,23 +319,23 @@ void test_GCQueue_IsEmpty_induced_testing(void)
  *
  * Scenario_0.0, fill the buffer till full
  * Arrange: Har
- * Act: Call GCQueue_Enqueue() in loop equal to the array`s (size -1)
+ * Act: Call GCQ_ENQUEUE_API(UTEST_TYPE_BEING_TESTED, ) in loop equal to the array`s (size -1)
  * Assert: the outcome shall be always gcq_status = GCQ_OK
  *
  * Assert: check if it full
  * Assert: all data of the buffer shall be enqueued_data = 1377
  */
-void test_GCQueue_Enqueue(void)
+void test_GCQ_ENQUEUE_API(void)
 {
 	GCQ_Status_t gcq_status;
 	uint32_t iterator = 0;
 	UTEST_TYPE_BEING_TESTED enqueued_data = 137;//random u8 number
 	//Scenario_0.0
-	gcq_status = GCQueue_EraseHard(&gcqueue_utest);
+	gcq_status = GCQ_HARD_ERASE_API(UTEST_TYPE_BEING_TESTED, &gcqueue_utest);
 	TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
 	for(iterator = 0 ; iterator < (QUEUE_BUFFER_SIZE-1) ; iterator++)
 	{
-		gcq_status = GCQueue_Enqueue(&gcqueue_utest, &enqueued_data);
+		gcq_status = GCQ_ENQUEUE_API(UTEST_TYPE_BEING_TESTED, &gcqueue_utest, &enqueued_data);
 		TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
 	}
 	for(iterator = 0 ; iterator < (QUEUE_BUFFER_SIZE-1) ; iterator++)
@@ -314,7 +343,7 @@ void test_GCQueue_Enqueue(void)
 		TEST_ASSERT_EQUAL(enqueued_data, gcqueue_utest.data_buffer_ptr[iterator]);
 	}
 	//Its now Full queue, Enqueue One more time expecting a full status
-	gcq_status = GCQueue_Enqueue(&gcqueue_utest, &enqueued_data);
+	gcq_status = GCQ_ENQUEUE_API(UTEST_TYPE_BEING_TESTED, &gcqueue_utest, &enqueued_data);
 	TEST_ASSERT_EQUAL(GCQ_FULL, gcq_status);
 	//Make sure our buffer isnt touched (test data integrity) after a full status
 	for(iterator = 0 ; iterator < (QUEUE_BUFFER_SIZE-1) ; iterator++)
@@ -328,14 +357,14 @@ void test_GCQueue_Enqueue(void)
  *
  * Scenario_0.0, dequeue untill empty
  * Arrange: Enqueue till Full
- * Act: Call GCQueue_Dequeue() in loop equal to the array size -1
+ * Act: Call GCQ_DEQUEUE_API(UTEST_TYPE_BEING_TESTED, ) in loop equal to the array size -1
  * Assert: the outcome shall be always gcq_status = GCQ_OK
  *
  * Scenario_1.0, Arrange a mixed enqueue, dequeue request
  *
  *
  */
-void test_GCQueue_Dequeue(void)
+void test_GCQ_DEQUEUE_API(void)
 {
 	GCQ_Status_t gcq_status;
 	uint32_t iterator;
@@ -345,50 +374,50 @@ void test_GCQueue_Dequeue(void)
 	//Scenario_0.0
 	for(iterator = 0 ; iterator < (QUEUE_BUFFER_SIZE-1) ; iterator++)
 	{
-		gcq_status = GCQueue_Enqueue(&gcqueue_utest, &enqueued_data);
+		gcq_status = GCQ_ENQUEUE_API(UTEST_TYPE_BEING_TESTED, &gcqueue_utest, &enqueued_data);
 		TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
 	}
 	for(iterator = 0 ; iterator < (QUEUE_BUFFER_SIZE-1) ; iterator++)
 	{
-		gcq_status = GCQueue_Dequeue(&gcqueue_utest, &dequeued_data);
+		gcq_status = GCQ_DEQUEUE_API(UTEST_TYPE_BEING_TESTED, &gcqueue_utest, &dequeued_data);
 		TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
 		TEST_ASSERT_EQUAL(enqueued_data, dequeued_data);
 	}
 	/*
 	 * One more dequeue, the status shall be Empty
 	 */
-	gcq_status = GCQueue_Dequeue(&gcqueue_utest, &dequeued_data);
+	gcq_status = GCQ_DEQUEUE_API(UTEST_TYPE_BEING_TESTED, &gcqueue_utest, &dequeued_data);
 	TEST_ASSERT_EQUAL(GCQ_EMPTY, gcq_status);
 	TEST_ASSERT_EQUAL(enqueued_data, dequeued_data);
 
 	//Scenario_1.0
 	for(iterator = 0 ; iterator < ((QUEUE_BUFFER_SIZE-1)) ; iterator++)
 	{
-		gcq_status = GCQueue_Enqueue(&gcqueue_utest, &enqueued_data);
+		gcq_status = GCQ_ENQUEUE_API(UTEST_TYPE_BEING_TESTED, &gcqueue_utest, &enqueued_data);
 		TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
 	}
 	for(iterator = 0 ; iterator < ((QUEUE_BUFFER_SIZE-1)) ; iterator++)
 	{
-		gcq_status = GCQueue_Dequeue(&gcqueue_utest, &dequeued_data);
+		gcq_status = GCQ_DEQUEUE_API(UTEST_TYPE_BEING_TESTED, &gcqueue_utest, &dequeued_data);
 		TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
 		TEST_ASSERT_EQUAL(enqueued_data, dequeued_data);
 	}
 	for(iterator = 0 ; iterator < ((QUEUE_BUFFER_SIZE-1)/2) ; iterator++)
 	{
-		gcq_status = GCQueue_Enqueue(&gcqueue_utest, &enqueued_data);
+		gcq_status = GCQ_ENQUEUE_API(UTEST_TYPE_BEING_TESTED, &gcqueue_utest, &enqueued_data);
 		TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
 	}
 	for(iterator = 0 ; iterator < ((QUEUE_BUFFER_SIZE-1)/4) ; iterator++)
 	{
-		gcq_status = GCQueue_Enqueue(&gcqueue_utest, &enqueued_data);
+		gcq_status = GCQ_ENQUEUE_API(UTEST_TYPE_BEING_TESTED, &gcqueue_utest, &enqueued_data);
 		TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
 	}
 	/*
 	 * TODO:Check again
 	 */
-//	gcq_status = GCQueue_Enqueue(&gcq_header_utest, &enqueued_data);
+//	gcq_status = GCQ_ENQUEUE_API(UTEST_TYPE_BEING_TESTED, &gcq_header_utest, &enqueued_data);
 //	TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
-//	gcq_status = GCQueue_Enqueue(&gcq_header_utest, &enqueued_data);
+//	gcq_status = GCQ_ENQUEUE_API(UTEST_TYPE_BEING_TESTED, &gcq_header_utest, &enqueued_data);
 //	TEST_ASSERT_EQUAL(GCQ_FULL, gcq_status);
 }
 
@@ -402,7 +431,7 @@ void test_GCQueue_Dequeue(void)
  *
  * Scenario_1.0, Arrange a mixed enqueue, dequeue request
  */
-void test_GCQueue_Peek(void)
+void test_GCQ_PEEK_API(void)
 {
 
 	GCQ_Status_t gcq_status;
@@ -422,19 +451,19 @@ void test_GCQueue_Peek(void)
 	//Assert
 	for(iterator = 0 ; iterator < QUEUE_BUFFER_SIZE-2 ; iterator++)
 	{
-		gcq_status = GCQueue_Enqueue(&gcqueue_utest, &enqueued_data[iterator]);
+		gcq_status = GCQ_ENQUEUE_API(UTEST_TYPE_BEING_TESTED, &gcqueue_utest, &enqueued_data[iterator]);
 		TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
 
-		gcq_status = GCQueue_Peek(&gcqueue_utest, &peeked_data);
+		gcq_status = GCQ_PEEK_API(UTEST_TYPE_BEING_TESTED, &gcqueue_utest, &peeked_data);
 		TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
 		TEST_ASSERT_EQUAL(enqueued_data[iterator], peeked_data);
 
-		gcq_status = GCQueue_Dequeue(&gcqueue_utest, &dequeued_data);
+		gcq_status = GCQ_DEQUEUE_API(UTEST_TYPE_BEING_TESTED, &gcqueue_utest, &dequeued_data);
 		TEST_ASSERT_EQUAL(GCQ_OK, gcq_status);
 		TEST_ASSERT_EQUAL(enqueued_data[iterator], dequeued_data);
 	}
 	//now the buffer shall be empty
-	gcq_status = GCQueue_Peek(&gcqueue_utest, &peeked_data);
+	gcq_status = GCQ_PEEK_API(UTEST_TYPE_BEING_TESTED, &gcqueue_utest, &peeked_data);
 	TEST_ASSERT_EQUAL(GCQ_EMPTY, gcq_status);
 	TEST_ASSERT_EQUAL(enqueued_data[iterator -1], peeked_data);
 
@@ -450,8 +479,8 @@ int main(void) {
     RUN_TEST(test_SoftErase_of_the_GCQueue);
     RUN_TEST(test_GCQueue_IsFull_induced_testing);
     RUN_TEST(test_GCQueue_IsEmpty_induced_testing);
-    RUN_TEST(test_GCQueue_Enqueue);
-    RUN_TEST(test_GCQueue_Dequeue);
-    RUN_TEST(test_GCQueue_Peek);
+    RUN_TEST(test_GCQ_ENQUEUE_API);
+    RUN_TEST(test_GCQ_DEQUEUE_API);
+    RUN_TEST(test_GCQ_PEEK_API);
     return UNITY_END();
 }
