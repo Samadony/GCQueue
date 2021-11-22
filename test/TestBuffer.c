@@ -7,7 +7,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#define UTEST_TYPE_BEING_TESTED			 uint32_t
+#define UTEST_TYPE_BEING_TESTED			 uint8_t
 #define UTEST_GCQ_HARD_ERASE_VALUE		(UTEST_TYPE_BEING_TESTED)0xAAAAAAAAU
 
 /*Full Encabsulation */

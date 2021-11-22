@@ -1,7 +1,6 @@
 #ifndef CQUEUE_H_
 #define CQUEUE_H_
 
-#include<GCQueue_Interface.h>
 #include<stdint.h>
 #include<utils/defines.h>
 
@@ -211,8 +210,33 @@ PUBLIC GCQ_Status_t GCQueue_Peek(GCQ_t* const self, TYPE* const TYPE##ptr_data_d
 	return gcq_status;                                                                                                  \
 }                                                                                                                       \
 
+#define DEFINE_GCQUEUE_CONC_HELPER(TYPE)		\
+typedef struct{ int32_t write_idx; int32_t read_idx; TYPE* data_buffer_ptr; GCQ_Status_t gcq_status;}GCQ_t;\
+PUBLIC GCQ_Status_t GCQueue_EraseHard(GCQ_t* const self);\
+PUBLIC GCQ_Status_t GCQueue_EraseSoft(GCQ_t* const self);\
+PUBLIC GCQ_Status_t GCQueue_Enqueue(GCQ_t* const self, const TYPE* const TYPE##ptr_data_enqueued);\
+PUBLIC GCQ_Status_t GCQueue_Dequeue(GCQ_t* const self, TYPE* const TYPE##ptr_data_dequeued);\
+PUBLIC GCQ_Status_t GCQueue_Peek(GCQ_t* const self, TYPE* const TYPE##ptr_data_dequeued);\
+PUBLIC GCQ_Status_t GCQueue_IsFull(const GCQ_t* const self);\
+PUBLIC GCQ_Status_t GCQueue_IsEmpty(const GCQ_t* const self);\
+GCQUEUE_ERASEHARD(TYPE)\
+GCQUEUE_ERASESOFT(TYPE)\
+GCQUEUE_ISFULL(TYPE)\
+GCQUEUE_ISEMPTY(TYPE)\
+GCQUEUE_ENQUEUE(TYPE)\
+GCQUEUE_DEQUEUE(TYPE)\
+GCQUEUE_PEEK(TYPE)\
 
-
+/*the abstractor is used to hid the instantiation implementation from the user,
+ * not used as a concatenation helper
+ */
+#define CREATE_GCQUEUE_ABSTRACTOR(TYPE, NAME, BUFFER_SIZE_IN_TYPE_SIZE)\
+PRIVATE TYPE NAME##_data_buffer[BUFFER_SIZE_IN_TYPE_SIZE];     			\
+PRIVATE GCQ_t NAME = {                                      			\
+		.write_idx = 0,                                                 \
+		.read_idx = 0,                                                  \
+		.data_buffer_ptr = NAME##_data_buffer,			                \
+};                                                                      \
 
 
 #endif //CQUEUE_H_
