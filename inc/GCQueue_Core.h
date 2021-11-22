@@ -9,7 +9,7 @@
  */
 #define GCQUEUE_ERASEHARD(TYPE)					GCQUEUE_ERASEHARD_CONC_HELPER(TYPE)
 #define GCQUEUE_ERASEHARD_CONC_HELPER(TYPE)																		 \
-PUBLIC GCQ_Status_t GCQueue_EraseHard(GCQ_t* const self)                                                         \
+PUBLIC GCQ_Status_t GCQueue_##TYPE##_EraseHard(GCQ_##TYPE##_t* const self)                                                         \
 {                                                                                                                \
 	GCQ_Status_t gcq_status = GCQ_ERROR_NUM;                                                                     \
                                                                                                                  \
@@ -31,7 +31,7 @@ PUBLIC GCQ_Status_t GCQueue_EraseHard(GCQ_t* const self)                        
 
 #define GCQUEUE_ERASESOFT(TYPE)					GCQUEUE_ERASESOFT_CONC_HELPER(TYPE)
 #define GCQUEUE_ERASESOFT_CONC_HELPER(TYPE) \
-PUBLIC GCQ_Status_t GCQueue_EraseSoft(GCQ_t* const self)														\
+PUBLIC GCQ_Status_t GCQueue_##TYPE##_EraseSoft(GCQ_##TYPE##_t* const self)														\
 {                                                                                                               \
 	GCQ_Status_t gcq_status = GCQ_ERROR_NUM;                                                                    \
                                                                                                                 \
@@ -52,7 +52,7 @@ PUBLIC GCQ_Status_t GCQueue_EraseSoft(GCQ_t* const self)														\
 
 #define GCQUEUE_ISFULL(TYPE)					GCQUEUE_ISFULL_CONC_HELPER(TYPE)
 #define GCQUEUE_ISFULL_CONC_HELPER(TYPE)		\
-PUBLIC GCQ_Status_t GCQueue_IsFull(const GCQ_t* const self)                                                               \
+PUBLIC GCQ_Status_t GCQueue_##TYPE##_IsFull(const GCQ_##TYPE##_t* const self)                                                               \
 {                                                                                                                         \
 	GCQ_Status_t gcq_status = GCQ_ERROR_NUM;                                                                              \
                                                                                                                           \
@@ -81,7 +81,7 @@ PUBLIC GCQ_Status_t GCQueue_IsFull(const GCQ_t* const self)                     
 
 #define GCQUEUE_ISEMPTY(TYPE)					GCQUEUE_ISEMPTY_CONC_HELPER(TYPE)
 #define GCQUEUE_ISEMPTY_CONC_HELPER(TYPE)		\
-PUBLIC GCQ_Status_t GCQueue_IsEmpty(const GCQ_t* const self)															  \
+PUBLIC GCQ_Status_t GCQueue_##TYPE##_IsEmpty(const GCQ_##TYPE##_t* const self)															  \
 {                                                                                                                         \
 	GCQ_Status_t gcq_status = GCQ_ERROR_NUM;                                                                              \
                                                                                                                           \
@@ -106,7 +106,7 @@ PUBLIC GCQ_Status_t GCQueue_IsEmpty(const GCQ_t* const self)															  \
 
 #define GCQUEUE_ENQUEUE(TYPE)					GCQUEUE_ENQUEUE_CONC_HELPER(TYPE)
 #define GCQUEUE_ENQUEUE_CONC_HELPER(TYPE)		\
-PUBLIC GCQ_Status_t GCQueue_Enqueue(GCQ_t* const self, const TYPE* const TYPE##ptr_data_enqueued)						  \
+PUBLIC GCQ_Status_t GCQueue_##TYPE##_Enqueue(GCQ_##TYPE##_t* const self, const TYPE* const TYPE##ptr_data_enqueued)						  \
 {                                                                                                                         \
 	GCQ_Status_t gcq_status = GCQ_ERROR_NUM;                                                                              \
                                                                                                                           \
@@ -120,7 +120,7 @@ PUBLIC GCQ_Status_t GCQueue_Enqueue(GCQ_t* const self, const TYPE* const TYPE##p
 			 * TODO: Do it to remove IsFull from the code completely saving some                                          \
 			 * flash                                                                                                      \
 			 */                                                                                                           \
-			if( QUEUE_ENABLE_OVR_WRT ||(GCQ_FULL != GCQueue_IsFull(self)) )                                               \
+			if( QUEUE_ENABLE_OVR_WRT ||(GCQ_FULL != GCQueue_##TYPE##_IsFull(self)) )                                               \
 			{                                                                                                             \
 				self->data_buffer_ptr[self->write_idx] = *TYPE##ptr_data_enqueued;                                        \
 				self->write_idx = ((self->write_idx + 1U) % QUEUE_BUFFER_SIZE);                                           \
@@ -146,17 +146,17 @@ PUBLIC GCQ_Status_t GCQueue_Enqueue(GCQ_t* const self, const TYPE* const TYPE##p
 
 #define GCQUEUE_DEQUEUE(TYPE)					GCQUEUE_DEQUEUE_CONC_HELPER(TYPE)
 #define GCQUEUE_DEQUEUE_CONC_HELPER(TYPE)		\
-PUBLIC GCQ_Status_t GCQueue_Dequeue(GCQ_t* const self, TYPE* const TYPE##ptr_data_dequeued)								 \
+PUBLIC GCQ_Status_t GCQueue_##TYPE##_Dequeue(GCQ_##TYPE##_t* const self, TYPE* const TYPE##ptr_data_dequeued)			 \
 {                                                                                                                        \
 	GCQ_Status_t gcq_status = GCQ_ERROR_NUM;                                                                             \
                                                                                                                          \
 	if((NULL != self) && (NULL != self->data_buffer_ptr))                                                                \
 	{                                                                                                                    \
-		if(NULL != TYPE##ptr_data_dequeued)                                                                                  \
+		if(NULL != TYPE##ptr_data_dequeued)                                                                              \
 		{                                                                                                                \
-			if( GCQ_EMPTY != GCQueue_IsEmpty(self))                                                                      \
+			if( GCQ_EMPTY != GCQueue_##TYPE##_IsEmpty(self))                                                             \
 			{                                                                                                            \
-				*TYPE##ptr_data_dequeued = self->data_buffer_ptr[self->read_idx];                                            \
+				*TYPE##ptr_data_dequeued = self->data_buffer_ptr[self->read_idx];                                        \
 				self->read_idx = ((self->read_idx + 1U) % QUEUE_BUFFER_SIZE);                                            \
 				gcq_status = GCQ_OK;                                                                                     \
 			}                                                                                                            \
@@ -180,7 +180,7 @@ PUBLIC GCQ_Status_t GCQueue_Dequeue(GCQ_t* const self, TYPE* const TYPE##ptr_dat
 
 #define GCQUEUE_PEEK(TYPE)					GCQUEUE_PEEK_CONC_HELPER(TYPE)
 #define GCQUEUE_PEEK_CONC_HELPER(TYPE)		\
-PUBLIC GCQ_Status_t GCQueue_Peek(GCQ_t* const self, TYPE* const TYPE##ptr_data_dequeued)								\
+PUBLIC GCQ_Status_t GCQueue_##TYPE##_Peek(GCQ_##TYPE##_t* const self, TYPE* const TYPE##ptr_data_dequeued)				\
 {                                                                                                                       \
 	GCQ_Status_t gcq_status = GCQ_ERROR_NUM;                                                                            \
                                                                                                                         \
@@ -188,7 +188,7 @@ PUBLIC GCQ_Status_t GCQueue_Peek(GCQ_t* const self, TYPE* const TYPE##ptr_data_d
 	{                                                                                                                   \
 		if(NULL != TYPE##ptr_data_dequeued)                                                                             \
 		{                                                                                                               \
-			if( GCQ_EMPTY != GCQueue_IsEmpty(self))                                                                     \
+			if( GCQ_EMPTY != GCQueue_##TYPE##_IsEmpty(self))                                                            \
 			{                                                                                                           \
 				*TYPE##ptr_data_dequeued = self->data_buffer_ptr[self->read_idx];                                       \
 				gcq_status = GCQ_OK;                                                                                    \
@@ -209,16 +209,18 @@ PUBLIC GCQ_Status_t GCQueue_Peek(GCQ_t* const self, TYPE* const TYPE##ptr_data_d
 	}                                                                                                                   \
 	return gcq_status;                                                                                                  \
 }                                                                                                                       \
-
-#define DEFINE_GCQUEUE_CONC_HELPER(TYPE)		\
-typedef struct{ int32_t write_idx; int32_t read_idx; TYPE* data_buffer_ptr; GCQ_Status_t gcq_status;}GCQ_t;\
-PUBLIC GCQ_Status_t GCQueue_EraseHard(GCQ_t* const self);\
-PUBLIC GCQ_Status_t GCQueue_EraseSoft(GCQ_t* const self);\
-PUBLIC GCQ_Status_t GCQueue_Enqueue(GCQ_t* const self, const TYPE* const TYPE##ptr_data_enqueued);\
-PUBLIC GCQ_Status_t GCQueue_Dequeue(GCQ_t* const self, TYPE* const TYPE##ptr_data_dequeued);\
-PUBLIC GCQ_Status_t GCQueue_Peek(GCQ_t* const self, TYPE* const TYPE##ptr_data_dequeued);\
-PUBLIC GCQ_Status_t GCQueue_IsFull(const GCQ_t* const self);\
-PUBLIC GCQ_Status_t GCQueue_IsEmpty(const GCQ_t* const self);\
+/*
+ * This is a concatenation helper yet serve abstraction well, hence i changed the name
+ */
+#define DEFINE_GCQUEUE_ABSTRACTOR(TYPE)		\
+typedef struct{ int32_t write_idx; int32_t read_idx; TYPE* data_buffer_ptr; GCQ_Status_t gcq_status;}GCQ_##TYPE##_t;\
+PUBLIC GCQ_Status_t GCQueue_##TYPE##_EraseHard(GCQ_##TYPE##_t* const self);\
+PUBLIC GCQ_Status_t GCQueue_##TYPE##_EraseSoft(GCQ_##TYPE##_t* const self);\
+PUBLIC GCQ_Status_t GCQueue_##TYPE##_Enqueue(GCQ_##TYPE##_t* const self, const TYPE* const TYPE##ptr_data_enqueued);\
+PUBLIC GCQ_Status_t GCQueue_##TYPE##_Dequeue(GCQ_##TYPE##_t* const self, TYPE* const TYPE##ptr_data_dequeued);\
+PUBLIC GCQ_Status_t GCQueue_##TYPE##_Peek(GCQ_##TYPE##_t* const self, TYPE* const TYPE##ptr_data_dequeued);\
+PUBLIC GCQ_Status_t GCQueue_##TYPE##_IsFull(const GCQ_##TYPE##_t* const self);\
+PUBLIC GCQ_Status_t GCQueue_##TYPE##_IsEmpty(const GCQ_##TYPE##_t* const self);\
 GCQUEUE_ERASEHARD(TYPE)\
 GCQUEUE_ERASESOFT(TYPE)\
 GCQUEUE_ISFULL(TYPE)\
@@ -232,7 +234,7 @@ GCQUEUE_PEEK(TYPE)\
  */
 #define CREATE_GCQUEUE_ABSTRACTOR(TYPE, NAME, BUFFER_SIZE_IN_TYPE_SIZE)\
 PRIVATE TYPE NAME##_data_buffer[BUFFER_SIZE_IN_TYPE_SIZE];     			\
-PRIVATE GCQ_t NAME = {                                      			\
+PRIVATE GCQ_##TYPE##_t NAME = {                                      			\
 		.write_idx = 0,                                                 \
 		.read_idx = 0,                                                  \
 		.data_buffer_ptr = NAME##_data_buffer,			                \

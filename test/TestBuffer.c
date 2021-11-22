@@ -14,6 +14,12 @@
 DEFINE_GCQUEUE(UTEST_TYPE_BEING_TESTED);
 CREATE_GCQUEUE(UTEST_TYPE_BEING_TESTED, gcqueue_utest, QUEUE_BUFFER_SIZE);
 
+/*
+ * Goal, test the template against mulitple definitins and instantiations
+ */
+DEFINE_GCQUEUE(uint32_t);
+CREATE_GCQUEUE(uint32_t, gcqueue_utest_2, QUEUE_BUFFER_SIZE);
+
 void setUp(void)
 {
 	gcqueue_utest.write_idx = -1;
