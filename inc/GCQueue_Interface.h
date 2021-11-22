@@ -20,7 +20,7 @@
  */
 #define QUEUE_ENABLE_OVR_WRT			false
 #define QUEUE_ERASE_VALUE				0x00U
-
+/*TODO: add macro helper here to add this pattern into the harderase api*/
 /*
  * There will be always one extra place need to be used, best that the user
  * adapt the numbe to be divisible by MEMORY_WORD knowing that there will be
@@ -275,7 +275,13 @@ GCQUEUE_DEQUEUE(TYPE)\
 GCQUEUE_PEEK(TYPE)\
 
 
-
+#define CREATE_GCQUEUE(TYPE, NAME, BUFFER_SIZE_IN_TYPE_SIZE)            \
+PRIVATE TYPE NAME##_data_buffer[BUFFER_SIZE_IN_TYPE_SIZE];     						\
+PRIVATE GCQ_t NAME = {                                      			\
+		.write_idx = 0,                                                 \
+		.read_idx = 0,                                                  \
+		.data_buffer_ptr = NAME##_data_buffer,			                            \
+};                                                                      \
 
 
 #endif /* INC_GCQUEUE_INTERFACE_H_ */
