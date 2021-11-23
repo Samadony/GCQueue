@@ -19,7 +19,8 @@
  */
 #define QUEUE_ENABLE_OVR_WRT			false
 #define QUEUE_ERASE_VALUE				0x00U
-/*TODO: add macro helper here to add this pattern into the harderase api*/
+
+/*TODO: add macro helper here to add this pattern into the hard erase API*/
 /*
  * There will be always one extra place need to be used, best that the user
  * adapt the numbe to be divisible by MEMORY_WORD knowing that there will be
@@ -28,6 +29,7 @@
 #define QUEUE_BUFFER_SIZE				1024U
 #define QUEUE_BUFFER_MEMORY_SECTION
 #define QUEUE_BUFFER_PACKING
+
 /*
  * Error and status of queue
  */
@@ -44,7 +46,11 @@ typedef enum{
 /*
  * Template to define queue_header + queue buffer with types varies between
  * signed/unsigned 8, 16, 32 and 64 bits variables
+ *
+ * Constraint, This MACRO shall be invoked once per type
+ * Preferred place of invocation is here in this file
  */
+
 #define DEFINE_GCQUEUE(TYPE)					DEFINE_GCQUEUE_ABSTRACTOR(TYPE)
 
 /* Pre -requisite: calling DEFINE_GCQUEUE() with the same type used for OBJECT_ADD creation
@@ -53,7 +59,6 @@ typedef enum{
  */
 #define CREATE_GCQUEUE(TYPE, NAME, BUFFER_SIZE_IN_TYPE_SIZE)\
 				CREATE_GCQUEUE_ABSTRACTOR(TYPE, NAME, BUFFER_SIZE_IN_TYPE_SIZE)
-
 /*
  * APIs
  */
