@@ -25,8 +25,11 @@
  * There will be always one extra place need to be used, best that the user
  * adapt the numbe to be divisible by MEMORY_WORD knowing that there will be
  * always size - 1 used to check the memory status (full not full)
+ *
+ * The size shall be divisible by 2
  */
-#define QUEUE_BUFFER_SIZE				1024U
+#define QUEUE_BUFFER_SIZE_1024				10
+#define QUEUE_BUFFER_SIZE				(1 << QUEUE_BUFFER_SIZE_1024)
 #define QUEUE_BUFFER_MEMORY_SECTION
 #define QUEUE_BUFFER_PACKING
 
